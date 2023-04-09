@@ -1,0 +1,28 @@
+.teammates-panel {
+    width: 300px;
+    background-color: #f5f5f5;
+    margin-right: 20px;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  
+  .teammates-panel__title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .teammates-panel__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .teammates-panel__list-item {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  

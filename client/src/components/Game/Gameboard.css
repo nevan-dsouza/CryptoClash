@@ -1,0 +1,110 @@
+.game-board {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: #F8F9FA;
+    border-radius: 10px;
+  }
+  
+  .codemasters-watching {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .timer {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .guesses {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .guess {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    margin: 0 0.5rem;
+  }
+  
+  .green {
+    background-color: #6DDA6B;
+  }
+  
+  .yellow {
+    background-color: #E5F22F;
+  }
+  
+  .grey {
+    background-color: #C4C4C4;
+  }
+  
+  .word-input {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .word-input label {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .word-input input {
+    font-size: 2rem;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+  }
+  
+  .choices {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .choice {
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border: 2px solid #212529;
+    border-radius: 5px;
+    margin: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .choice:hover {
+    background-color: #212529;
+    color: white;
+  }
+  
+  .selected {
+    background-color: #212529;
+    color: white;
+  }
+  .submit-button {
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    background-color: #212529;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #343A40;
+  }
+  

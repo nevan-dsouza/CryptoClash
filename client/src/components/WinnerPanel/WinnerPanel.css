@@ -1,0 +1,31 @@
+.winner-panel {
+    background-color: #F2E2CE;
+    border: 2px solid #6D4C41;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    margin: 20px;
+    text-align: center;
+    font-size: 24px;
+  }
+  
+  .winner-panel h2 {
+    margin-bottom: 20px;
+  }
+  
+  .winner-panel button {
+    background-color: #6D4C41;
+    color: white;
+    font-size: 18px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .winner-panel button:hover {
+    background-color: #8C6E58;
+  }
+
+  
