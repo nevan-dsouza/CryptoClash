@@ -3,6 +3,7 @@ const Room = require('../models/Room');
 const createRoom = async (req, res) => {
   try {
     const { roomId } = req.body;
+    console.log(`roomID: ${roomId}`)
     const room = new Room({ roomId });
     await room.save();
     res.status(201).json(room);
@@ -56,8 +57,10 @@ const updateRoom = async (req, res) => {
 };
 
 module.exports = {
-  createRoom,
+  createRoom ,
   getRoomById,
   updateRoom,
   deleteRoomById
-}
+};
+  
+

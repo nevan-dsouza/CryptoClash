@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const mongoose = require('mongoose');
+const db = require('./utils/db');
 
 const playerRoutes = require('./routes/playerRoutes');
 const roomRoutes = require('./routes/roomRoutes');
@@ -17,27 +17,6 @@ app.use(express.static('client/build'));
 
 // Parse JSON requests
 app.use(express.json());
-
-const { MongoClient } = require("mongodb");
- 
-// Replace the following with your Atlas connection string                                                                                                                                        
-const url = process.env.ATLAS_URI;
-const client = new MongoClient(url);
-
-async function run() {
-    try {
-        await client.connect();
-        console.log("Connected correctly to server");
-
-    } catch (err) {
-        console.log(err.stack);
-    }
-    finally {
-        await client.close();
-    }
-}
-
-run().catch(console.dir);
 
 // mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true })
 //   .then(() => console.log('Connected to MongoDB'))

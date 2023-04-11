@@ -1,14 +1,12 @@
-const mongoose = require('mongoose');
+require('dotenv').config();
 
-const DB_URI = process.env.ATLAS_URI;
+// console.log(process.env.DB_URI);
 
-mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
-const db = mongoose.connection;
-
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB!');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://nevan-dsouza:dkTVqsEL8YR2Uamb@cyrptoclash.frozmvu.mongodb.net/?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+client.connect(err => {
+  const collection = client.db("test").collection("room");
+  // perform actions on the collection object
+  client.close();
 });
-
-module.exports = db;
