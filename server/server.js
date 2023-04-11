@@ -1,124 +1,108 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
-const axios = require('axios');
+const mongoose = require('mongoose');
+
+const playerRoutes = require('./routes/playerRoutes');
+const roomRoutes = require('./routes/roomRoutes');
+const wordRoutes = require('./routes/wordRoutes');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: '*',
-  },
-});
+const io = socketIo(server);
 
-const players = new Map(); // A map to store player socket IDs and their respective team names
-const teams = {
-  codemasters: [],
-  decoders: []
-};
+// Serve the build folder from the client
+app.use(express.static('client/build'));
 
-// Helper function to add a player to a team
-const addPlayerToTeam = (playerId, team) => {
-  players.set(playerId, team);
-  teams[team].push(playerId);
-};
-
-// Helper function to remove a player from a team
-const removePlayerFromTeam = (playerId) => {
-  const team = players.get(playerId);
-  if (team) {
-    players.delete(playerId);
-    teams[team] = teams[team].filter((id) => id !== playerId);
-  }
-};
-
-// Helper function to get the team with the fewer players
-const getTeamWithFewerPlayers = () => {
-  return teams.codemasters.length <= teams.decoders.length ? 'codemasters' : 'decoders';
-};
-
-// SecretWord
-let secretWord = '';
-
-const isValidSecretWord = async (word) => {
-  // Check if the word has the correct length
-  if (word.length !== 5) {
-    return false;
-  }
-
-  // Check if the word has a meaning using the Datamuse API
-  try {
-    const response = await axios.get(`https://api.datamuse.com/words?sp=${word}&max=1`);
-    return response.data.length > 0;
-  } catch (error) {
-    console.error(`Error validating word: ${error}`);
-    return false;
-  }
-};
-
-const compareGuess = (guess, secretWord) => {
-  const feedback = [];
-
-  for (let i = 0; i < guess.length; i++) {
-    if (guess[i] === secretWord[i]) {
-      feedback.push('green');
-    } else if (secretWord.includes(guess[i])) {
-      feedback.push('yellow');
-    } else {
-      feedback.push('darkgrey');
-    }
-  }
-
-  return feedback;
-};
-
-
-
-
-app.use(cors());
+// Parse JSON requests
 app.use(express.json());
 
-mongoose.connect('mongodb+srv://nevan-dsouza:dkTVqsEL8YR2Uamb@cyrptoclash.frozmvu.mongodb.net/?retryWrites=true&w=majority', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const { MongoClient } = require("mongodb");
+ 
+// Replace the following with your Atlas connection string                                                                                                                                        
+const url = process.env.ATLAS_URI;
+const client = new MongoClient(url);
 
+async function run() {
+    try {
+        await client.connect();
+        console.log("Connected correctly to server");
+
+    } catch (err) {
+        console.log(err.stack);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+run().catch(console.dir);
+
+// mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true })
+//   .then(() => console.log('Connected to MongoDB'))
+//   .catch((err) => console.log(err));
+
+
+// API endpoint to generate random words
+app.use('/api/words', wordRoutes);
+
+
+// API endpoints for player management
+app.post('/api/players', playerRoutes.createPlayer);
+app.get('/api/players/:id', playerRoutes.getPlayerById);
+app.put('/api/players/:id', playerRoutes.updatePlayer);
+app.delete('/api/players/:id', playerRoutes.deletePlayerById);
+
+// API endpoints for room management
+app.post('/api/rooms', roomRoutes.createRoom);
+app.get('/api/rooms/:id', roomRoutes.getRoomById);
+app.put('/api/rooms/:id', roomRoutes.updateRoom);
+app.delete('/api/rooms/:id', roomRoutes.deleteRoomById);
+
+// Socket.io event handlers
 io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log(`Client ${socket.id} connected`);
 
-  // Add player to a team
-  const team = getTeamWithFewerPlayers();
-  addPlayerToTeam(socket.id, team);
+  // Event listener for 'join room' event
+  socket.on('join room', ({ playerName, team, roomId }) => {
+    console.log(`Client ${socket.id} joined room ${roomId}`);
+    socket.join(roomId);
+    io.to(roomId).emit('player joined', { playerName, team, playerId: socket.id });
+  });
 
-  // Send the team name to the player
-  socket.emit('team', team);
+  // Event listener for 'secret word submit' event
+  socket.on('secret word submit', ({ secretWord, round, roomId }) => {
+    io.to(roomId).emit('secret word received', { secretWord, round });
+  });
 
-  socket.on('selectSecretWord', async (word) => {
-    if ((await isValidSecretWord(word)) && secretWord === '') {
-      secretWord = word;
-      io.emit('secretWordSelected', secretWord);
-    }
-  });  
+  // Event listener for 'codemasters failed' event
+  socket.on('codemasters failed', (round, roomId) => {
+    io.to(roomId).emit('codemasters failed', round);
+  });
 
-  socket.on('submitGuess', (guess) => {
-    const room = findRoomByPlayerId(socket.id);
-    if (room) {
-      const feedback = compareGuess(guess, room.secretWord);
-      socket.to(room.id).emit('decodersFeedback', { guess, feedback });
-      socket.to(room.id).emit('codemastersFeedback', { guess, feedback, secretWord: room.secretWord });
+  // Event listener for 'guess submitted' event
+  socket.on('guess submitted', ({ guess, round, team, roomId }) => {
+    const secretWord = socket.secretWords[round - 1];
+    const guessResult = utils.checkSecretWord(secretWord, guess);
+    io.to(roomId).emit('guess result', { guess, result: guessResult, round, team });
+    if (guessResult === 'correct') {
+      io.to(roomId).emit('game over', { winningTeam: team });
     }
   });
-  
 
-  // Handle player disconnection
+  // Event listener for 'send message' event
+  socket.on('send message', ({ message, playerName, team, roomId }) => {
+    io.to(roomId).emit('message received', { message, playerName, team });
+  });
+
+  // Event listener for 'disconnect' event
   socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
-    removePlayerFromTeam(socket.id);
+    console.log(`Client ${socket.id} disconnected`);
+    io.to(socket.roomId).emit('player left', { playerId: socket.id });
   });
 });
 
-
-const PORT = process.env.PORT || 5000;
+// Start the server
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
