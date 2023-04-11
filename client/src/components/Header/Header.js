@@ -1,12 +1,9 @@
 import React from 'react'
-import './Header.css'
 
-function Header({ teamName }) {
+function Header() {
   return (
-    <div className="header">
-      <h1>{teamName}</h1>
-    </div>
-  );
+    <div>Header</div>
+  )
 }
 
 export default Header
