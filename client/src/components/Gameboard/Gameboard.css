@@ -1,0 +1,66 @@
+.gameboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  .guess-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px 0;
+  }
+  
+  .guess-index {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #232323;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.2em;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .correct {
+    background-color: #33cc33;
+  }
+  
+  .almost-correct {
+    background-color: #ffff33;
+  }
+  
+  .incorrect {
+    background-color: #232323;
+  }
+  
+  .guess-letters {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    margin-left: 10px;
+  }
+  
+  .guess-letter {
+    font-weight: bold;
+    font-size: 1.2em;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 5px;
+    border-radius: 50%;
+    color: #ffffff;
+  }
+  
+  .correct-letter {
+    background-color: #33cc33;
+  }
+  

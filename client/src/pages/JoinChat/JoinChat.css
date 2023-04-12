@@ -1,0 +1,74 @@
+.joinChatContainer {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+
+  width: 100%;
+  margin-top: 20vh;
+}
+
+.joinChatContainer h3 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.joinChatContainer input {
+  width: 20vw;
+  height: 40px;
+  margin: 7px;
+  border: 2px solid #43a047;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.joinChatContainer button {
+  /* width: 225px; */
+  height: 50px;
+  margin: 7px;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 16px;
+  background: #43a047;
+  color: #fff;
+  cursor: pointer;
+}
+
+.joinChatContainer button:hover {
+  background: #2e7d32;
+}
+
+@media screen and (min-width: 601px) {
+  .joinChatContainer input {
+    width: 40vw;
+  }
+
+  .joinChatContainer button {
+    width: 30vw;
+  }
+}
+
+/* If the screen size is 600px wide or less, set the font-size of <div> to 30px */
+@media screen and (max-width: 600px) {
+  .joinChatContainer input {
+    width: 90vw;
+  }
+  .joinChatContainer button {
+    width: 70vw;
+  }
+}
+@media screen and (max-width: 270px) {
+  .darkLightModeBtn {
+    width: 120px;
+    height: 35px;
+    font-size: 10px;
+    margin-top: 30px;
+  }
+}
+@media screen and (max-width: 230px) {
+  .darkLightModeBtn {
+    width: 80px;
+  }
+}
