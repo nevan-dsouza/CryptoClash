@@ -6,6 +6,10 @@ router
     .post('/', roomController.createRoom)
     .post('/:roomId', roomController.joinRoomById)
     .get('/:roomId', roomController.getRoomById)
+    .put('/secret/:roomId', roomController.updateRoomBySecretWord)
+    .put('/start/:roomId', roomController.updateRoomByGameStart)
+    .put('/guess/:roomId', roomController.updateRoomByGuess)
+    .put('/round/:roomId', roomController.updateRoomByRoundAndPoints)
     .put('/:id', roomController.updateRoom)
     .delete('/:roomId', roomController.deleteRoomById);
 

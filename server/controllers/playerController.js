@@ -3,26 +3,57 @@ const Player = require('../models/Player');
 const createPlayer = async (req, res) => {
   try {
     const { name } = req.body;
+
+    var player_ = await Player.findOne({ name });
+    if (player_) {
+      return res.status(404).send({ message: 'Player already exists! Try other name!' });
+    }
+
     const player = new Player({ name });
     await player.save();
     res.status(201).json(player);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
+  } catch (ex) {
+    for (field in ex.errors) {
+      res.status(400).send(ex.errors[field].message);
+    }
+    res.end();
+    return;
   }
 };
+
+const getPlayerByName = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    const player = await Player.findOne({ name });
+    if (!player) {
+      return res.status(404).send({message: 'Player not found'});
+    }
+    res.json(player);
+  } catch (ex) {
+    for (field in ex.errors) {
+      res.status(400).send(ex.errors[field].message);
+    }
+    res.end();
+    return;
+  }
+};
+
 
 const getPlayerById = async (req, res) => {
   try {
     const { id } = req.params;
     const player = await Player.findById(id);
     if (!player) {
-      return res.status(404).send('Player not found');
+      return res.status(404).send({message: 'Player not found'});
     }
     res.json(player);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
+  } catch (ex) {
+    for (field in ex.errors) {
+      res.status(400).send(ex.errors[field].message);
+    }
+    res.end();
+    return;
   }
 };
 
@@ -31,12 +62,15 @@ const deletePlayerById = async (req, res) => {
     const { id } = req.params;
     const player = await Player.findByIdAndDelete(id);
     if (!player) {
-      return res.status(404).send('Player not found');
+      return res.status(404).send({message: 'Player not found'});
     }
-    res.status(200).send('Player deleted!');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Internal server error');
+    res.status(200).send({message: 'Player deleted!'});
+  } catch (ex) {
+    for (field in ex.errors) {
+      res.status(400).send(ex.errors[field].message);
+    }
+    res.end();
+    return;
   }
 };
 
@@ -46,12 +80,15 @@ const updatePlayerById = async (req, res) => {
       new: true,
     });
     if (!player) {
-      return res.status(404).json({ error: 'Player not found' });
+      return res.status(404).json({ message: 'Player not found' });
     }
     res.json(player);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to update player' });
+  } catch (ex) {
+    for (field in ex.errors) {
+      res.status(400).send(ex.errors[field].message);
+    }
+    res.end();
+    return;
   }
 };
 
@@ -59,5 +96,6 @@ module.exports = {
   createPlayer,
   getPlayerById,
   deletePlayerById,
-  updatePlayerById
+  updatePlayerById,
+  getPlayerByName
 }

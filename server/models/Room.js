@@ -1,17 +1,5 @@
 const mongoose = require('mongoose');
 
-// const roomSchema = new mongoose.Schema({
-//   roomId: { type: String, required: true, unique: true },
-//   players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Player' }],
-//   teamAssignments: [{ type: Object }],
-//   winner: { type: String },
-//   gameOver: { type: Boolean, default: false },
-//   guesses: [{ type: Object }],
-//   secretWord: [{ type: String }],
-//   created: { type: Date, default: Date.now }
-// });
-
-
 const roomSchema = new mongoose.Schema({
   roomId: { type: String, required: true, unique: true },
   players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Player' }],
@@ -19,24 +7,31 @@ const roomSchema = new mongoose.Schema({
     {
       codemasters: {
         players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Player' }],
-        secret_word: { type: String },
+        secret_word: [{ type: String }],
         team_score: {
           type: Number,
           default: 0,
-        }
+        },
+        start_game: { type: Boolean, default: false },
+        start_time: { type: Date },
+        time_remaining_in_secs: { type: Number}
       },
       decoders: {
-        players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Player' }],
         guesses: [{
           guess: { type: String },
-          player: { type: mongoose.Schema.Types.ObjectId, ref: 'Player' },
-          correct_letters: [{ type: String, maxLength: 1 }],
-          misplaced_letters: [{ type: String, maxLength: 1 }]
+          // player: { type: mongoose.Schema.Types.ObjectId, ref: 'Player' },
+          // correct_letters: [{ type: String, maxLength: 1 }],
+          // misplaced_letters: [{ type: String, maxLength: 1 }],
+          guess_output: [{ type: String, maxLength: 1 }]
         }],
+        players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Player' }],
         team_score: {
           type: Number,
           default: 0,
-        }
+        },
+        start_game: { type: Boolean, default: false },
+        start_time: { type: Date },
+        time_remaining_in_secs: { type: Number }
       },
       round: {
         type: Number,

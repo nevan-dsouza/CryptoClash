@@ -4,6 +4,7 @@ const playerController = require('../controllers/playerController');
 
 router
     .post('/', playerController.createPlayer)
+    .post('/name', playerController.getPlayerByName)
     .get('/:id', playerController.getPlayerById)
     .put('/:id', playerController.updatePlayerById)
     .delete('/:id', playerController.deletePlayerById);
