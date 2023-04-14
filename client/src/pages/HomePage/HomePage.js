@@ -42,7 +42,7 @@ function HomePage({ onPlayerJoin, onRoomCreate }) {
 
   return (
     <div className="home">
-      <h1>Welcome to CryptoClash!</h1>
+      <h1>Welcome to Wordle!</h1>
       <div className="options">
         <Link to="/profile">Profile</Link>
         <Link to="/instructions">Instructions</Link>
