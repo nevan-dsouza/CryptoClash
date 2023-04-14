@@ -20,7 +20,7 @@ const createRoom = async (req, res) => {
       path: "players",
       model: "Player",
     })
-    .exec();
+      .exec();
 
     res.status(201).json(newRoom);
 
@@ -38,15 +38,24 @@ const joinRoomById = async (req, res) => {
     const { roomId } = req.params;
     const { player_name } = req.body;
 
-    var room = await Room.findOne({ roomId });
-    if (!room) {
-      return res.status(404).send({message: 'Room not found'});
-    }
-
     var player = await Player.findOne({ name: player_name });
     if (!player) {
-      return res.status(404).send({message: 'Player not found'});
+
+      player = new Player({ name:player_name  });
+      await player.save();
+
+      // return res.status(404).send({message: 'Player not found'});
     }
+
+    player = await Player.findOne({ name: player_name });
+
+
+    var room = await Room.findOne({ roomId });
+    if (!room) {
+       room = new Room({ roomId, players: [player], teamAssignments: [{ codemasters: { players: [player] } }] });
+      await room.save();
+    }
+
 
     // check if user exists in chat
     var playerAlreadyExists = await Room.findOne({
@@ -58,16 +67,19 @@ const joinRoomById = async (req, res) => {
       ],
     });
 
-    if (playerAlreadyExists) {
+    if (playerAlreadyExists ) {
 
       const newRoom = await Room.findOne({ roomId }).populate({
         path: "players",
         model: "Player",
       })
-      .exec();
+        .exec();
 
       return res.status(200).send(newRoom);
     }
+
+
+    console.log('not reaching here')
 
     const teamAssignments = room.teamAssignments;
     const number_of_code_masters = room.teamAssignments[teamAssignments.length - 1].codemasters.players.length;
@@ -111,9 +123,7 @@ const joinRoomById = async (req, res) => {
       path: "players",
       model: "Player",
     })
-    .exec();
-
-    
+      .exec();
 
     res.status(201).send(newRoom);
     res.end()
@@ -135,10 +145,10 @@ const getRoomById = async (req, res) => {
       path: "players",
       model: "Player",
     })
-    .exec();
+      .exec();
 
     if (!room) {
-      return res.status(404).send({message: 'Room not found'});
+      return res.status(404).send({ message: 'Room not found' });
     }
     res.json(room);
   } catch (ex) {
@@ -155,9 +165,9 @@ const deleteRoomById = async (req, res) => {
     const { roomId } = req.params;
     const room = await Room.findOneAndDelete({ roomId });
     if (!room) {
-      return res.status(404).send({message: 'Room not found'});
+      return res.status(404).send({ message: 'Room not found' });
     }
-    res.status(200).send({message: 'Room Deleted'});
+    res.status(200).send({ message: 'Room Deleted' });
   } catch (ex) {
     for (field in ex.errors) {
       res.status(400).send(ex.errors[field].message);
@@ -175,19 +185,19 @@ const updateRoomByGameStart = async (req, res) => {
 
     const room = await Room.findOne({ roomId });
     if (!room) {
-      return res.status(404).send({message: 'Room not found'});
+      return res.status(404).send({ message: 'Room not found' });
     }
 
     var player = await Player.findOne({ name: player_name });
     if (!player) {
-      return res.status(404).send({message: 'Player not found'});
+      return res.status(404).send({ message: 'Player not found' });
     }
 
     const no_of_players = room.players.length;
 
     // No players on other team --- if players has 1 element
     if (no_of_players <= 1) {
-      return res.status(404).send({message:'No Members on other team!'});
+      return res.status(404).send({ message: 'No Members on other team!' });
     }
 
     const teamAssignments = room.teamAssignments;
@@ -208,7 +218,15 @@ const updateRoomByGameStart = async (req, res) => {
     }
 
     if (alreadyStarted.length != 0) {
-      return res.status(200).send('Game already started!');
+
+      var newRoom = await Room.findOne({ roomId }).populate({
+        path: "players",
+        model: "Player",
+      })
+        .exec();
+
+      // return res.status(200).send({room: newRoom, message: 'Game already started!'});
+      return res.status(200).send(newRoom);
     }
 
     else {
@@ -258,7 +276,7 @@ const updateRoomByGameStart = async (req, res) => {
       path: "players",
       model: "Player",
     })
-    .exec();
+      .exec();
 
     const codemasters_started = newRoom.teamAssignments[teamAssignments.length - 1].codemasters.start_game;
     const decoders_started = newRoom.teamAssignments[teamAssignments.length - 1].decoders.start_game;
@@ -302,7 +320,7 @@ const updateRoomByGameStart = async (req, res) => {
       path: "players",
       model: "Player",
     })
-    .exec();
+      .exec();
     return res.status(201).send(newRoom);
 
 
@@ -323,12 +341,12 @@ const updateRoomBySecretWord = async (req, res) => {
 
     const room = await Room.findOne({ roomId });
     if (!room) {
-      return res.status(404).send({message: 'Room not found'});
+      return res.status(404).send({ message: 'Room not found' });
     }
 
     var player = await Player.findOne({ name: player_name });
     if (!player) {
-      return res.status(404).send({message: 'Player not found'});
+      return res.status(404).send({ message: 'Player not found' });
     }
 
     const teamAssignments = room.teamAssignments;
@@ -338,15 +356,59 @@ const updateRoomBySecretWord = async (req, res) => {
     var now = new Date();
 
     // countDown is passed
-    if ((now.getTime() - 30000) > start_time.getTime()) {
-      // console.log("Selected date is in the past");
+    // if ((now.getTime() - 30000) > start_time.getTime()) {
+    //   // console.log("Selected date is in the past");
 
+    //   await Room.findOneAndUpdate(
+    //     { roomId },
+    //     {
+    //       "teamAssignments.$[element].codemasters.time_remaining_in_secs": 0,
+    //     }
+    //     ,
+    //     {
+    //       arrayFilters: [
+    //         {
+    //           "element.round": round,
+    //         },
+    //       ],
+    //     },
+    //     { returnOriginal: false }
+    //   );
+    //   var newRoom = await Room.findOne({ roomId }).populate({
+    //     path: "players",
+    //     model: "Player",
+    //   })
+    //   .exec();
+    //   // return res.status(201).send({ room: newRoom, message: "Time's Up!" });
+    //   return res.status(201).send(newRoom);
+
+    // }
+
+
+    // console.log("Selected date is NOT in the past");
+
+    const word_exists = room.teamAssignments[teamAssignments.length - 1].codemasters.secret_word[0];
+
+    var playerIsCodeMaster = await Room.aggregate([{ $project: { teamAssignments: { $arrayElemAt: ['$teamAssignments', -1] } } },
+    { $match: { 'teamAssignments.codemasters.players': { $in: [player._id] } } }])
+
+    if (playerIsCodeMaster.length == 0) {
+      return res.status(404).send({ message: 'Player is not code master' });
+    }
+
+    if (word_exists) {
+      return res.status(404).send({ message: 'Word already exists' });
+    }
+
+    else {
       await Room.findOneAndUpdate(
         { roomId },
         {
-          "teamAssignments.$[element].codemasters.time_remaining_in_secs": 0,
-        }
-        ,
+          $push: { "teamAssignments.$[element].codemasters.secret_word": secret_word },
+          "teamAssignments.$[element].codemasters.time_remaining_in_secs": null,
+          "teamAssignments.$[element].decoders.start_time": Date.now(),
+          "teamAssignments.$[element].decoders.time_remaining_in_secs": 60,
+        },
         {
           arrayFilters: [
             {
@@ -356,57 +418,16 @@ const updateRoomBySecretWord = async (req, res) => {
         },
         { returnOriginal: false }
       );
-      var newRoom = await Room.findOne({ roomId }).populate({
-        path: "players",
-        model: "Player",
-      })
-      .exec();
-      return res.status(201).send({ room: newRoom, message: "Time's Up!" });
-
-    } else {
-      // console.log("Selected date is NOT in the past");
-
-      const word_exists = room.teamAssignments[teamAssignments.length - 1].codemasters.secret_word[0];
-
-      var playerIsCodeMaster = await Room.aggregate([{ $project: { teamAssignments: { $arrayElemAt: ['$teamAssignments', -1] } } },
-      { $match: { 'teamAssignments.codemasters.players': { $in: [player._id] } } }])
-
-      if (playerIsCodeMaster.length == 0) {
-        return res.status(200).send({message: 'Player is not code master'});
-      }
-
-      if (word_exists) {
-        return res.status(200).send({message: 'Word already exists'});
-      }
-
-      else {
-        await Room.findOneAndUpdate(
-          { roomId },
-          {
-            $push: { "teamAssignments.$[element].codemasters.secret_word": secret_word },
-            "teamAssignments.$[element].codemasters.time_remaining_in_secs": null,
-            "teamAssignments.$[element].decoders.start_time": Date.now(),
-            "teamAssignments.$[element].decoders.time_remaining_in_secs": 60,
-          },
-          {
-            arrayFilters: [
-              {
-                "element.round": round,
-              },
-            ],
-          },
-          { returnOriginal: false }
-        );
-
-      }
-      var newRoom = await Room.findOne({ roomId }).populate({
-        path: "players",
-        model: "Player",
-      })
-      .exec();
-      return res.status(201).send(newRoom);
 
     }
+    var newRoom = await Room.findOne({ roomId }).populate({
+      path: "players",
+      model: "Player",
+    })
+      .exec();
+    return res.status(201).send(newRoom);
+
+
   } catch (ex) {
     for (field in ex.errors) {
       res.status(400).send(ex.errors[field].message);
@@ -424,12 +445,12 @@ const updateRoomByGuess = async (req, res) => {
 
     const room = await Room.findOne({ roomId });
     if (!room) {
-      return res.status(404).send({message: 'Room not found'});
+      return res.status(404).send({ message: 'Room not found' });
     }
 
     var player = await Player.findOne({ name: player_name });
     if (!player) {
-      return res.status(404).send({message: 'Player not found'});
+      return res.status(404).send({ message: 'Player not found' });
     }
 
     const teamAssignments = room.teamAssignments;
@@ -441,38 +462,39 @@ const updateRoomByGuess = async (req, res) => {
     { $match: { 'teamAssignments.decoders.players': { $in: [player._id] } } }])
 
     if (playerIsDecoder.length == 0) {
-      return res.status(200).send({message: 'Player is not decoder'});
+      return res.status(404).send({ message: 'Player is not decoder' });
     }
     const start_time = room.teamAssignments[teamAssignments.length - 1].decoders.start_time;
     var now = new Date();
 
     // countDown is passed
-    if ((now.getTime() - 60000) > start_time.getTime()) {
-      // console.log("Selected date is in the past");
+    // if ((now.getTime() - 60000) > start_time.getTime()) {
+    //   // console.log("Selected date is in the past");
 
-      await Room.findOneAndUpdate(
-        { roomId },
-        {
-          "teamAssignments.$[element].decoders.time_remaining_in_secs": 0,
-        }
-        ,
-        {
-          arrayFilters: [
-            {
-              "element.round": round,
-            },
-          ],
-        },
-        { returnOriginal: false }
-      );
-      var newRoom = await Room.findOne({ roomId }).populate({
-        path: "players",
-        model: "Player",
-      })
-      .exec();
-      return res.status(201).send({ room: newRoom, message: "Time's Up!" });
+    //   await Room.findOneAndUpdate(
+    //     { roomId },
+    //     {
+    //       "teamAssignments.$[element].decoders.time_remaining_in_secs": 0,
+    //     }
+    //     ,
+    //     {
+    //       arrayFilters: [
+    //         {
+    //           "element.round": round,
+    //         },
+    //       ],
+    //     },
+    //     { returnOriginal: false }
+    //   );
+    //   var newRoom = await Room.findOne({ roomId }).populate({
+    //     path: "players",
+    //     model: "Player",
+    //   })
+    //   .exec();
+    //   // return res.status(201).send({ room: newRoom, message: "Time's Up!" });
+    //   return res.status(201).send(newRoom);
 
-    }
+    // }
 
     if (no_of_guesses >= 5) {
 
@@ -492,7 +514,8 @@ const updateRoomByGuess = async (req, res) => {
         { returnOriginal: false }
       );
       var newRoom = await Room.findOne({ roomId });
-      return res.status(201).send({ room: newRoom, message: "Guess limit reached!" });
+      // return res.status(201).send({ room: newRoom, message: "Guess limit reached!" });
+      return res.status(201).send(newRoom);
     }
 
     else {
@@ -548,14 +571,15 @@ const updateRoomByGuess = async (req, res) => {
         path: "players",
         model: "Player",
       })
-      .exec();
-      return res.status(201).send({ room: newRoom, message: "Correct Guess" });
+        .exec();
+      // return res.status(201).send({ room: newRoom, message: "Correct Guess" });
+      return res.status(201).send(newRoom);
     }
     var newRoom = await Room.findOne({ roomId }).populate({
       path: "players",
       model: "Player",
     })
-    .exec();
+      .exec();
     return res.status(201).send(newRoom);
 
   } catch (ex) {
@@ -574,7 +598,7 @@ const updateRoomByRoundAndPoints = async (req, res) => {
 
     const room = await Room.findOne({ roomId });
     if (!room) {
-      return res.status(404).send({message: 'Room not found'});
+      return res.status(404).send({ message: 'Room not found' });
     }
 
     const teamAssignments = room.teamAssignments;
@@ -639,7 +663,7 @@ const updateRoomByRoundAndPoints = async (req, res) => {
       path: "players",
       model: "Player",
     })
-    .exec();
+      .exec();
     return res.status(201).send(newRoom);
 
   } catch (ex) {

@@ -1,0 +1,20 @@
+.About-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80%;
+  width: 70%;
+  margin: auto;
+  margin-top: 2%;
+}
+
+
+.about-chat-bubble {
+  width: 80%;
+}
+
+@media screen and (max-width: 834px) {
+  .About-main {
+    width: 95%;
+  }
+}

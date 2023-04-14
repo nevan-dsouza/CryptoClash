@@ -9,10 +9,12 @@ import InstructionsPage from "./pages/InstructionsPage/InstructionsPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import Lobby from "./components/Lobby/Lobby";
 import Room from "./components/Room/Room";
+import Game from "./pages/Game/Game";
 
 
 import Chat from "./pages/Chat/Chat";
 import JoinChat from "./pages/JoinChat/JoinChat";
+import Instructions from "./pages/Instructions/Instructions";
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -33,7 +35,7 @@ function App() {
 
   return (
     <div className="App">
-        <Header />
+        {/* <Header /> */}
         <Routes>
           {/* <Route exact path="/" element={
               <HomePage
@@ -44,7 +46,8 @@ function App() {
           /> */}
           <Route path="/" element={<JoinChat  />} />
           <Route path="/chat" element={<Chat />} />
-          <Route exact path="/instructions" element={<InstructionsPage />} />
+          <Route path="/game" element={<Game />} />
+          <Route exact path="/instructions" element={<Instructions />} />
           <Route exact path="/profile" element={<ProfilePage />} />
           <Route
             exact

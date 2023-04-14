@@ -1,7 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
+
+import playerReducer from "../features/player/playerSlice";
+import roomReducer from "../features/room/roomSlice";
+
 export const store = configureStore({
   reducer: {
-    user: {},
-    chat: {},
+    player: playerReducer,
+    room: roomReducer,
   },
 });

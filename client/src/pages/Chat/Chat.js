@@ -28,7 +28,7 @@ import {
 import io from "socket.io-client";
 const socket = io.connect("http://localhost:8080");
 
-function Chat({ darkMode }) {
+function Chat({ username, room , darkMode}) {
   const { width, height } = useWindowSize();
 
   const location = useLocation();
@@ -39,7 +39,7 @@ function Chat({ darkMode }) {
 
   const dispatch = useDispatch();
 
-  const { username, room } = location.state;
+  // const { username, room } = location.state;
   const [currentMessage, setCurrentMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
   const [lastMessageData, setLastMessageData] = useState(undefined);
@@ -87,11 +87,11 @@ function Chat({ darkMode }) {
 
   return (
     <div className="Chat-main">
-      {width >= 769 ? (
+      {/* {width >= 769 ? (
         <div className="logo-image-section">
           <img src={femaleChat} className="about-male-chat-illustration" />
         </div>
-      ) : null}
+      ) : null} */}
       <MDBModal show={basicModal} setShow={setBasicModal} tabIndex="-1">
         <MDBModalDialog>
           <MDBModalContent>
@@ -217,12 +217,12 @@ function Chat({ darkMode }) {
         </div>
       </div>
 
-      {width >= 1200 ? (
+      {/* {width >= 1200 ? (
         <div className="logo-image-section">
           <img src={bubbleChatDownLeft} className="about-chat-bubble" />
           <img src={bubbleChatUpRight} className="about-chat-bubble" />
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }
