@@ -555,6 +555,7 @@ const updateRoomByGuess = async (req, res) => {
         { roomId },
         {
           "teamAssignments.$[element].decoders.time_remaining_in_secs": null,
+          "teamAssignments.$[element].decoders.correct_guess": true,
         }
         ,
         {

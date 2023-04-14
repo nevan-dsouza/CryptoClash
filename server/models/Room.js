@@ -31,7 +31,8 @@ const roomSchema = new mongoose.Schema({
         },
         start_game: { type: Boolean, default: false },
         start_time: { type: Date },
-        time_remaining_in_secs: { type: Number }
+        time_remaining_in_secs: { type: Number },
+        correct_guess: { type: Boolean, default: false },
       },
       round: {
         type: Number,
