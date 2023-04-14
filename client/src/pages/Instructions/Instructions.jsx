@@ -39,13 +39,13 @@ const Instructions = () => {
             textJustify: "inter-word",
           }}
         >
-          Welcome to our competitive and cooperative multiplayer game, similar to Wordle! Teams of Codemasters and Decoders are set, with Codemasters coming up with a secret 5-letter word within 30 seconds, choosing from options provided by Datamuse API. Decoders then have 1 minute and 5 guesses to crack the secret word, with hints displayed in different colors. Points are awarded based on successful guesses, with 6 rounds in total and teams switching after 3 rounds.
+          There are 2 teams in the game, Codemasters and Decoders. These teams are set, with Codemasters coming up with a secret 5-letter word within 30 seconds. Decoders then have 1 minute and 5 guesses to crack the secret word, with hints displayed in different colors. Points are awarded based on successful guesses, with 6 rounds in total and teams switching after 3 rounds. Good luck!
         </div>
 
         <div
           className={`d-flex justify-content-around align-items-center  text-dark`}
         >
-          <footer>&copy; Copyright 2023 Wordle</footer>
+          <footer>&copy; Copyright 2023 CryptoClash</footer>
           <p
             style={{
               fontSize: "2rem",
@@ -62,7 +62,7 @@ const Instructions = () => {
       </div>
       {width >= 1200 ? (
         <div className="logo-image-section">
-          <img src={bubbleChat} className="about-chat-bubble" />
+          <img src={bubbleChat} className="about-chat-bubble" alt="bubble chat"/>
         </div>
       ) : null}
     </div>
