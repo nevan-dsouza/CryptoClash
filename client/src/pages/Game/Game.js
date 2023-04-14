@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import "./Game.css"
-import { createRoom, joinRoom, getRoom, updateRoomByGameStart, updateRoomBySecretWord, updateRoomByGuess, updateRoomByRoundPoints } from "../../features/room/roomActions";
+import { getRoom, updateRoomByGameStart, updateRoomBySecretWord, updateRoomByGuess, updateRoomByRoundPoints } from "../../features/room/roomActions";
 import lightBackround from "../../assets/light-background.jpg";
 import avatar from "../../assets/avatar.png"
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useWordChecker } from 'react-word-checker';
 import Chat from '../Chat/Chat';
+import Spinner from "../../components/Spinner/Spinner";
 
 export default function Game() {
 
@@ -29,23 +30,19 @@ export default function Game() {
     const [room_, setRoom] = useState(null);
 
     const teamAssignments_ = room_?.teamAssignments;
-    // console.log('playerInfo', playerInfo)
-    console.log('room_', room_)
-    console.log('room', room)
 
+    // console.log('room_', room_)
+    // console.log('room', room)
 
     const submitSecretWord = () => {
 
         var letters = /^[A-Za-z]+$/;
 
         if (secretWord?.length == 5 && secretWord.match(letters) && wordExists(secretWord)) {
-            //submit
-            // console.log('ready to submit')
             setSecretWordError('')
             dispatch(updateRoomBySecretWord({ player_name: playerInfo?.name, secret_word: secretWord, roomId }))
 
         } else {
-            //     console.log('secret word should be five vvalid')
             setSecretWordError('Secret word should be five characters valid word!')
         }
     }
@@ -53,13 +50,10 @@ export default function Game() {
     const submitGuessWord = () => {
 
         if (guessWord?.length == 5) {
-            //submit
-            // console.log('ready to submit')
             setGuessWordError('')
             dispatch(updateRoomByGuess({ player_name: playerInfo?.name, guess: guessWord, roomId }))
 
         } else {
-            //     console.log('secret word should be five vvalid')
             setGuessWordError('Guess word should be of five characters!')
         }
 
@@ -85,38 +79,27 @@ export default function Game() {
         }
     }, [room_]);
 
-    // Update Round
+
     useEffect(() => {
-
-        if (room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length == 5) {
-            // call update for round
-            dispatch(updateRoomByRoundPoints({ roomId }))
-        }
-    }, [
-        room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length
-    ])
-
-    //room_?.teamAssignments[teamAssignments_.length - 1].decoders?.guesses.length
-
-    // console.log('isCodeMaster', isCodeMaster)
-    // console.log('room_?.teamAssignments[teamAssignments_.length - 1].codemasters?.start_game', room_?.teamAssignments[teamAssignments_.length - 1].codemasters?.start_game)
+        setRoom(room)
+    }, [room])
 
 
-    useEffect(() => { 
-    
-        setRoom(room)},[room])
+    useEffect(() => {
+        dispatch(getRoom({ roomId }))
+    }, [])
 
-    setTimeout(() => {
+    // setTimeout(() => {
 
-        // dispatch(getRoom({roomId}))
+    //     // dispatch(getRoom({roomId}))
 
-        if (JSON.stringify(room_) != JSON.stringify(room)) {
-            // update room
-            setRoom(room)
+    //     if (JSON.stringify(room_) != JSON.stringify(room)) {
+    //         // update room
+    //         setRoom(room)
 
-            console.log('room updated!')
-        }
-    }, 1000)
+    //         console.log('room updated!')
+    //     }
+    // }, 1000)
 
 
     return (
@@ -143,6 +126,7 @@ export default function Game() {
                     </div>
                 )}
             </div>
+
             <div className="game_panel">
                 <div className="game_main_header">
                     Room # {roomId} &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;  {mode}
@@ -166,111 +150,214 @@ export default function Game() {
                         </span>
                     </div>
                 </div>
-                {(room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == true && room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.start_game == true)
-                    ?
-                    <div className="game_panel_heading_container">
-                        <div className="players_panel_heading">
-                            <span className="player_name">Game Started </span>
 
-                            {isCodeMaster ?
 
-                                (room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word.length != 1) ?
+                {/* when code master joins the room --- CODE MASTER --- View */}
+                {(isCodeMaster && room_?.players?.length <= 1 && room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == false) &&
+                    <div className="players_panel_heading">
+                        <span className="player_name">Waiting for Decoders to Join !</span>
+                    </div>
+                }
+
+                {/* when decoder joins the room -- DECODER --- View*/}
+                {(!isCodeMaster && room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.start_game == false) &&
+                    <>
+                        {loadingRoom ? <Spinner /> :
+                            <div className="heroSecCardGame" onClick={() => dispatch(updateRoomByGameStart({ player_name: playerInfo?.name, roomId }))}>
+                                Start Game
+                            </div>}
+                    </>
+                }
+
+                {/* when decoder joined the room and code master not started game ---  CODE MASTER --- View */}
+                {(isCodeMaster && room_?.players?.length > 1 && room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == false) &&
+
+                    <>
+                        {loadingRoom ? <Spinner /> :
+                            <div className="heroSecCardGame" onClick={() => dispatch(updateRoomByGameStart({ player_name: playerInfo?.name, roomId }))}>
+                                Start Game
+                            </div>}
+                    </>
+                }
+
+
+                {/* when decoder starts the game -- DECODER --- View*/}
+                {(!isCodeMaster && room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.start_game == true
+                    && room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == false
+                ) &&
+                    <div className="players_panel_heading">
+                        <span className="player_name">Waiting for Code Masters to Start !</span>
+                    </div>
+                }
+
+
+                {/* when code master starts the game ---  CODE MASTER --- View */}
+                {(isCodeMaster && room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == true &&
+                    room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.start_game == false
+                ) &&
+                    <div className="players_panel_heading">
+                        <span className="player_name">Waiting for Decoders to Start !</span>
+                    </div>
+                }
+
+                {/* when game is started from both ends ---  CODE MASTER --- View */}
+                {(isCodeMaster && room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == true &&
+                    room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.start_game == true
+                ) &&
+                    <div className="players_panel_heading">
+                        <span className="player_name">Game Started </span><br />
+
+                        {/* when secret word is NOT submitted ---  CODE MASTER --- View */}
+                        {(room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word.length != 1)
+                            && (
+                                <>
+                                    <span className="player_name">Enter Secret Word (5 letters) </span>
+                                    <div className="InputContainer">
+                                        <input placeholder="Enter Secret Word" type="text" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} />
+                                        {secretWordError &&
+                                            <div className="field-error-meesage">
+                                                {secretWordError}
+                                            </div>
+                                        }
+                                    </div>
+                                    {loadingRoom ? <Spinner /> :
+                                        <div className="heroSecCardGame" onClick={submitSecretWord}>
+                                            Submit
+                                        </div>
+                                    }
+                                </>
+                            )}
+
+                        {/* when secret word is submitted and Decoders are guessing ---  CODE MASTER --- View */}
+
+                        {(room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word.length == 1 && room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length < 5) &&
+
+                            <>
+                                <span className="player_name">Decoders are guessing  ----- [{room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word}] </span>
+                                <br />
+                                <span> " - " means " letter is not in secret " </span><br />
+                                <span> " O " means " letter is misplaced " </span><br />
+
+
+                                {/* show decoders guesses */}
+                                {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.map((guessObj) => (
+                                    <div>
+                                        <span className="player_name">Guess: [{guessObj.guess}] ---------- Result : [{guessObj.guess_output}]</span>
+                                    </div>
+                                ))}
+                            </>
+                        }
+
+                        {/* when secret word is submitted and Decoder's GUESSES are OVER or CORRECT GUESS ---  CODE MASTER --- View */}
+                        {(room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word.length == 1 &&
+                            (room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length == 5
+                                || room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.correct_guess == true)) &&
+                            <>
+                            
+                                <div className="player_name">
+                                    Round is Over -------- New Points : {
+                                        room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.correct_guess == true ?
+                                            room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.team_score :
+                                            room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.team_score + 10
+                                    }
+                                </div>
+
+                                {
+                                    loadingRoom ? <Spinner /> :
+                                        <div className="heroSecCardGame" onClick={() => dispatch(updateRoomByRoundPoints({ roomId }))}>
+                                            Start New Round
+                                        </div>
+                                }
+
+                            </>
+                        }
+
+                    </div>
+                }
+
+                {/* ------------------------------------------------------------------------------------------ */}
+
+                {/* when game is started from both ends ---  DECODERS --- View */}
+                {(!isCodeMaster && room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == true &&
+                    room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.start_game == true
+                )
+                    &&
+                    <div className="players_panel_heading">
+                        <span className="player_name">Game Started </span><br />
+
+                        {/* when secret word is NOT submitted ---  DECODERS --- View */}
+                        {(room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word.length != 1)
+                            && (
+                                <span className="player_name">Code Masters are thinking for a secret word! </span>
+                            )
+                        }
+
+                        {/* when secret word is submitted and Decoders are guessing ---  DECODERS --- View */}
+
+                        {(room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word.length == 1 && room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length < 5) &&
+
+                            <>
+                                <span className="player_name">Attempts Left:</span> {5 - room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length}<br />
+                                <span> " - " means " letter is not in secret " </span><br />
+                                <span> " O " means " letter is misplaced " </span><br />
+                                {/* show decoders guesses*/}
+                                {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.map((guessObj) => (
+                                    <div>
+                                        <span className="player_name">Guess: [{guessObj.guess}] ---------- Result : [{guessObj.guess_output}]</span>
+                                    </div>
+                                ))}
+
+                                {/* show guess input*/}
+
+                                {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.correct_guess == false
+                                    &&
                                     <>
+                                        <span className="player_name">Enter Your Guess (5 letters) </span>
                                         <div className="InputContainer">
-                                            <input placeholder="Enter Secret Word" type="text" value={secretWord} onChange={(e) => setSecretWord(e.target.value)} />
-                                            {secretWordError &&
+                                            <input placeholder="Enter Guess Word" type="text" value={guessWord} onChange={(e) => setGuessWord(e.target.value)} />
+                                            {guessWordError &&
                                                 <div className="field-error-meesage">
-                                                    {secretWordError}
+                                                    {guessWordError}
                                                 </div>
                                             }
                                         </div>
-                                        <div className="heroSecCardGame">
-                                            <div onClick={submitSecretWord} >Submit</div>
-                                        </div>
-                                    </>
 
-                                    :
-
-                                    room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length < 5 ?
-                                        <>
-                                            <span className="player_name">Decoders are guessing </span>
-                                            {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.map((guessObj) => (
-                                                <div>
-                                                    <span className="player_name">Guess: {guessObj.guess} ---- Result : {guessObj.guess_output}</span>
-                                                </div>
-                                            ))}
-                                        </> :
-                                        <><hr />
-                                            <div className="player_name">
-                                                Round is Over ----- Points : {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.team_score}
+                                        {loadingRoom ? <Spinner /> :
+                                            <div className="heroSecCardGame" onClick={submitGuessWord}>
+                                                Submit
                                             </div>
-                                        </>
-
-                                :
-                                // secret added
-                                (room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word?.length == 1) ?
-                                    <>
-
-                                        {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.map((guessObj) => (
-                                            <div>
-                                                <span className="player_name">Guess: {guessObj.guess} ---- Result : {guessObj.guess_output}</span>
-                                            </div>
-                                        ))
-
-                                        }
-
-                                        {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length < 5 ?
-                                            (
-                                                <>
-                                                    <span className="player_name">Enter Your Guess (5 letters) </span>
-                                                    <div className="InputContainer">
-                                                        <input placeholder="Enter Guess Word" type="text" value={guessWord} onChange={(e) => setGuessWord(e.target.value)} />
-                                                        {guessWordError &&
-                                                            <div className="field-error-meesage">
-                                                                {guessWordError}
-                                                            </div>
-                                                        }
-                                                    </div>
-                                                    <div className="heroSecCardGame">
-                                                        <div onClick={submitGuessWord} >Submit</div>
-                                                    </div>
-                                                </>)
-
-                                            :
-
-                                            <><hr />
-                                                <div className="player_name">
-                                                    Round is Over ----- Points : {room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.team_score}
-                                                </div>
-                                            </>
-
                                         }
 
                                     </>
-                                    :
-                                    <span className="player_name">Code Masters are thinking for a secret word! </span>
-                            }
 
-                        </div>
-                    </div> :
-                    room_?.players?.length <= 1 ?
+                                }
 
-                        <div className="players_panel_heading">
-                            <span className="player_name">Waiting for Others to Join !</span>
-                        </div> :
+                            </>
+                        }
 
-                        (room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == true || room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.start_game == true) ?
+                        {/* when secret word is submitted and Decoder's GUESSES are OVER or CORRECT GUESS ---  DECODER --- View */}
+                        {(room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.secret_word.length == 1 &&
+                            (room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.guesses?.length == 5
+                                || room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.correct_guess == true)) &&
+                            <>
+                                <div className="player_name">
+                                    Round is Over -------- New Points : {
+                                        room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.correct_guess == true ?
+                                            room_?.teamAssignments[teamAssignments_?.length - 1].decoders?.team_score + 10 :
+                                            room_?.teamAssignments[teamAssignments_?.length - 1].codemasters?.team_score
+                                    }
+                                </div>
 
-                            <div className="players_panel_heading">
-                                <span className="player_name">Game Started Waiting for other team ... !</span>
-                            </div> :
-                            <div className="heroSecCardGame">
-                                <div onClick={() => dispatch(updateRoomByGameStart({ player_name: playerInfo?.name, roomId }))} >Start Game</div>
-                            </div>
-
+                                {loadingRoom ? <Spinner /> :
+                                    <div className="heroSecCardGame" onClick={() => dispatch(updateRoomByRoundPoints({ roomId }))}>
+                                        Start New Round
+                                    </div>}
+                            </>
+                        }
+                    </div>
                 }
-
             </div>
+
             {roomId && playerInfo?.name &&
 
                 <Chat username={playerInfo?.name} room={roomId} />

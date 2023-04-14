@@ -61,12 +61,11 @@
 .player_container{
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-left: 15px;
-    padding-right: 15px;
+    justify-content: center;
     border: 1px solid white;
     width: 80%;
     margin-top: 15px;
+    overflow: scroll;
 }
 
 .player_avatar{
@@ -90,12 +89,17 @@
     height: 70vh;
     background-color: rgba(64, 38, 84, 0.941);
     border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 .game_panel_heading_container{
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: space-between;
+    width: 90%;
 }
 
 .chat_panel {
@@ -112,7 +116,8 @@
     font-size: 20px;
     padding: 5px;
     margin: 20px;
-    width: 40%;
+    width: 60%;
+    align-self: center;
     display: flex;
     align-items: center;
     justify-content: center;

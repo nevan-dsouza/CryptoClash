@@ -99,7 +99,7 @@ function Chat({ username, room , darkMode}) {
               <MDBModalTitle>
                 {}
                 Exit Chat{" "}
-                <i class="fas fa-exclamation-triangle text-danger"></i>
+                <i className="fas fa-exclamation-triangle text-danger"></i>
               </MDBModalTitle>
             </MDBModalHeader>
 
